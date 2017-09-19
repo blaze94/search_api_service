@@ -75,7 +75,7 @@ public class WebController {
         pagingParam.setTotalCount(totalCnt);
 
         PagingResult pagingResult = pageService.getPage(pagingParam);
-
+        model.put("agg",agg.getBuckets());
         model.put("pagingResult", pagingResult);
         model.put("q", query);
 

@@ -26,11 +26,7 @@
 
         <script src="/assets/js/modernizr.min.js"></script>
     </head>
-    <#if agg??>
-        <#list agg as item>
-            <li><label><input type="checkbox" name="authorFacet" value="${item.getKeyAsString()}">${item.getKeyAsString()} (${item.getDocCount()})</label></li>
-        </#list>
-    </#if>
+
 
     <body>
 
@@ -77,8 +73,14 @@
                             </div>
 
                         </div>
-
-
+<!--
+                        <div class="col-sm-6 col-lg-3 col-md-4 ">
+                            <#if agg??>
+                                <#list agg as item>
+                                    <li><label><input type="checkbox" name="authorFacet" value="${item.getKeyAsString()}">${item.getKeyAsString()} (${item.getDocCount()})</label></li>
+                                </#list>
+                            </#if>
+                        </div>-->
                         <div class="row">
                             <div class="m-b-15">
                                 <#if mapList??>
@@ -105,17 +107,17 @@
                         <div class="pagination-container text-center">
                             <ul class="pagination">
                                 <#if pagingResult.prevPage gt 0 >
-                                    <li class="paginate_button previous" ><a href="/api/select?q=${q}&from=${pagingResult.prevPage}&size=${size}&type=${type}" style="color:black"><i class="fa fa-angle-left"></i></a></li>
+                                    <li class="paginate_button previous" ><a href="/web/search?q=${q}&from=${pagingResult.prevPage}&size=${size}&type=${type}" style="color:black"><i class="fa fa-angle-left"></i></a></li>
                                 </#if>
                                 <#list pagingResult.startPage..pagingResult.endPage as indexI>
                                     <#if indexI == pagingResult.nowPage>
                                         <li class="paginate_button current" ><a style="color: #fff;background-color: #455a64; "href="#" >${indexI}</a></li>
                                         <#else>
-                                            <li class="paginate_button" ><a href="/api/select?q=${q}&from=${indexI}&size=${size}&type=${type}" style="color:black">${indexI}</a></li>
+                                            <li class="paginate_button" ><a href="/web/search?q=${q}&from=${indexI}&size=${size}&type=${type}" style="color:black">${indexI}</a></li>
                                     </#if>
                                 </#list>
                                 <#if pagingResult.nextPage gt 0 >
-                                    <li class="paginate_button next" ><a href="/api/select?q=${q}&from=${pagingResult.nextPage}&size=${size}&type=${type}" style="color:black" ><i class="fa fa-angle-right"></i></a></li>
+                                    <li class="paginate_button next" ><a href="/web/search?q=${q}&from=${pagingResult.nextPage}&size=${size}&type=${type}" style="color:black" ><i class="fa fa-angle-right"></i></a></li>
                                 </#if>
                             </ul>
                         </div>
