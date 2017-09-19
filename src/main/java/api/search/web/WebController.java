@@ -121,6 +121,9 @@ public class WebController {
                     mapData.put("content", "");
                 }
             }
+            mapData.put("publishdate", map.get("publishdate").toString());
+            mapData.put("price", map.get("price").toString());
+            mapData.put("imgsrc", map.get("imgsrc").toString());
 
             mapList.add(mapData);
         }

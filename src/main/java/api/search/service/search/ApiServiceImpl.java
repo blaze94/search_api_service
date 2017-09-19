@@ -131,13 +131,14 @@ public class ApiServiceImpl implements ApiService {
 
         /*Highlight*/
         HighlightBuilder highlightBuilder = new HighlightBuilder()
-                .preTags("<span class=\"k_point\">")
-                .postTags("</span>")
-                .field("title")
-                .field("sub_title")
+                .preTags("<b>")
+                .postTags("</b>")
+                .field("content",20,2)
+                .field("content",30,3)
                 .field("author")
                 .field("publisher")
                 .field("keyword");
+
 
 
         /*Spellcheck*/
