@@ -1,0 +1,48 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Error</title>
+
+<style>
+body, div, p, h1, h2, h3, fieldset { padding:0; margin:0; }
+body { background:#fff url(/libeka/css/theme1/error/error_top_bg.gif) repeat-x; text-align:center; }
+ul, li, dl, dt, dd { list-style:none; margin:0; padding:0; }
+h1 { display:none; }
+img { border:0;}
+
+#topArea { width:538px; border-bottom: #2965C3 4px solid; margin:100px auto 45px auto; padding-bottom:6px; height:59px ;BACKGROUND: url(/libekacss/theme1/error/img_book.gif) no-repeat right top; }
+#topArea h2 { text-align:left; padding-top:20px; font-family:Tahoma,dotum,돋움,sans-serif; color:#2A5B9C;}
+#topArea .book { DISPLAY: inline-block; float:right; margin:0; padding:0;}
+
+#content{ width:350px; margin:0 auto; text-align:left; }
+#content h3 { background:url(/libekacss/theme1/error/img_error02.gif) no-repeat; padding:2px 0 0 40px; font-size:16px; font-family:dotum,돋움,sans-serif; letter-spacing:-1px; color:#333; line-height:25px; height:38px; margin-bottom:34px; }
+#content p { font-size:12px; font-family:dotum,돋움,sans-serif; color:#666; line-height:18px; padding-bottom:10px; }
+#content p a { font-weight:bold; color:#576FE6; text-decoration:underline; }
+
+</style>
+<script language="javascript" type="text/javascript">
+function return_Click()
+{
+	//history.back();
+	location.href = "/libeka";
+}
+</script>
+</head>
+<body>
+
+<div id="topArea">
+	<h2>error page</h2>
+</div>
+<div id="content">
+	<h3>오류가 발생하였습니다.</h3>
+	<p>
+	방문하시려는 페이지에 오류가 발생하였습니다.<br />
+	<br /><br />
+	</p>
+	<p><a href="javascript:return_Click();"><img src="/libeka/css/theme1/error/btn_back.gif" alt="돌아가기"></a></p>
+</div>
+</body>
+</html>

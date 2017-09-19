@@ -1,0 +1,21 @@
+{
+    "index":{
+        "analysis":{
+            "analyzer":{
+                "nfd_analyzer": {
+                    "tokenizer": "standard",
+                    "char_filter": [
+                        "nfd_normalizer"
+                    ]
+                }
+            },
+            "char_filter": {
+                "nfd_normalizer": {
+                    "type": "icu_normalizer",
+                    "name": "nfc",
+                    "mode": "decompose"
+                }
+            }
+        }
+    }
+}

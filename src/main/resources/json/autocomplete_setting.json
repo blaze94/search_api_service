@@ -1,0 +1,57 @@
+{
+    "settings": {
+        "index": {
+            "analysis": {
+                "analyzer": {
+                    "my-index-edge-jaso":{
+                        "type":"custom",
+                        "tokenizer":"keyword",
+                        "filter":["lowercase","unique","my-jaso-filter","edge_filter"]
+                    },
+                    "my-index-full-jaso":{
+                        "type":"custom",
+                        "tokenizer":"keyword",
+                        "filter":["lowercase","edge_reverse_filter","my-jaso-filter","edge_filter"]
+                    },
+                    "my-search-jaso":{
+                        "type":"custom",
+                        "tokenizer":"keyword",
+                        "filter":["lowercase","my-jaso-filter"]
+                    },
+                    "my-token": {
+                        "tokenizer": "keyword_tokenizer"
+                    }
+                },
+                "filter": {
+                    "my-jaso-filter" : {
+                        "type" : "qj-analyzer-filter",
+                        "tokenizer": "keyword",
+                        "mode":"simple_jaso",
+                        "jaso_mode" : "full",
+                        "jaso_typo" : true
+                    },
+                    "edge_filter": {
+                        "type": "edge_ngram",
+                        "min_gram": 1,
+                        "max_gram": 20
+                    },
+                    "edge_reverse_filter": {
+                        "type": "edge_ngram",
+                        "min_gram": 1,
+                        "max_gram": 10,
+                        "side" : "back",
+                        "token_chars": [
+                            "letter",
+                            "digit"
+                        ]
+                    }
+                },
+                "tokenizer": {
+                    "keyword_tokenizer": {
+                        "type": "keyword"
+                    }
+                }
+            }
+        }
+    }
+}
