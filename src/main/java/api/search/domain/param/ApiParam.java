@@ -12,15 +12,17 @@ public class ApiParam implements Serializable {
     private static final long serialVersionUID = 4385857263750266038L;
 
     private String q;                   //검색키워드
-    private String type;                //도서,음반,매거진(book,magazine,music)
+    private String category1;                   //검색키워드
+    private String category2;                   //검색키워드
+    private String telephone;                   //검색키워드
     private String rate;         //년도별 필터(옵션)
-    private String price;    //년도 범위 필터(옵션)
-    private String agg;                 //집합셋
-    private String agg_sort;             //집합셋 출력 순서
+    private String pt;    //년도 범위 필터(옵션)
+    private Integer d = 10;
     private String sort;                //검색 정렬 조건_count desc)
     private Integer size;                //출력 개수
-    private Integer from;                //결과출력 시작위치
+    private Integer from = 0;                //결과출력 시작위치
     private String fq;                  //결과내 재검색
+
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -34,12 +36,28 @@ public class ApiParam implements Serializable {
         this.q = q;
     }
 
-    public String getType() {
-        return type;
+    public String getCategory1() {
+        return category1;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCategory1(String category1) {
+        this.category1 = category1;
+    }
+
+    public String getCategory2() {
+        return category2;
+    }
+
+    public void setCategory2(String category2) {
+        this.category2 = category2;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
     }
 
     public String getRate() {
@@ -50,36 +68,12 @@ public class ApiParam implements Serializable {
         this.rate = rate;
     }
 
-    public String getPrice() {
-        return price;
+    public String getPt() {
+        return pt;
     }
 
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getFq() {
-        return fq;
-    }
-
-    public void setFq(String fq) {
-        this.fq = fq;
-    }
-
-    public String getAgg() {
-        return agg;
-    }
-
-    public void setAgg(String agg) {
-        this.agg = agg;
-    }
-
-    public String getAgg_sort() {
-        return agg_sort;
-    }
-
-    public void setAgg_sort(String agg_sort) {
-        this.agg_sort = agg_sort;
+    public void setPt(String pt) {
+        this.pt = pt;
     }
 
     public String getSort() {
@@ -104,5 +98,21 @@ public class ApiParam implements Serializable {
 
     public void setFrom(Integer from) {
         this.from = from;
+    }
+
+    public String getFq() {
+        return fq;
+    }
+
+    public void setFq(String fq) {
+        this.fq = fq;
+    }
+
+    public Integer getD() {
+        return d;
+    }
+
+    public void setD(Integer d) {
+        this.d = d;
     }
 }

@@ -32,8 +32,6 @@ public class ApiController {
     public @ResponseBody void search(HttpServletRequest request, HttpServletResponse response, @Valid ApiParam apiParam) throws  Exception{
         String result = "";
         String query = apiParam.getQ();
-        String rate = apiParam.getRate();
-        String price = apiParam.getPrice();
 
         if (Strings.isNullOrEmpty(query)){
             apiParam.setQ("*");

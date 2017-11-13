@@ -15,6 +15,7 @@ import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 /**
  * Created by GGBX08 on 2017-07-11.
@@ -39,15 +40,12 @@ public class ESConnector {
                     .build();
 
             client = new PreBuiltTransportClient(settings)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("13.124.36.214"), 9300));    //검증 터널링
-//                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("175.198.113.122"), 58801));    //개발서버(집)
-//                      .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("10.21.48.74"), 9300));     //검증계 검색 서버
-//                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("52.78.175.82"), 9300));
         }
         return  instance;
     }
 
-    public SearchResponse search(String[] indexName, String typeName, QueryBuilder queryBuilder, SortBuilder sortBuilders, HighlightBuilder highlightBuilder, SuggestBuilder suggestBuilder, AggregationBuilder aggregationBuilder, ApiParam apiParam) {
+    public SearchResponse search(String[] indexName, String typeName, QueryBuilder queryBuilder, SortBuilder sortBuilders, HighlightBuilder highlightBuilder, SuggestBuilder suggestBuilder, List<AggregationBuilder> listAggregationBuilder, ApiParam apiParam) {
         int fromRows = 0;
         int size = 12;
 
@@ -69,8 +67,10 @@ public class ESConnector {
                 .addSort(sortBuilders)
                 .suggest(suggestBuilder);
 
-        if (aggregationBuilder != null){
-            searchRequestBuilder.addAggregation(aggregationBuilder);
+        if (listAggregationBuilder != null){
+            for(AggregationBuilder aggregationBuilder : listAggregationBuilder) {
+                searchRequestBuilder.addAggregation(aggregationBuilder);
+            }
         }
 
         System.out.println(searchRequestBuilder.toString());
@@ -81,11 +81,12 @@ public class ESConnector {
         return  searchResponse;
     }
 
-    public SearchResponse executeAutocompleteQuery(QueryBuilder queryBuilder, String indexName, String typeName) throws Exception{
+    public SearchResponse executeAutocompleteQuery(String indexName, String typeName,QueryBuilder queryBuilder, AggregationBuilder aggregationBuilder) throws Exception{
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch().setIndices(indexName)
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setTypes(typeName)
                 .setQuery(queryBuilder)
+                .addAggregation(aggregationBuilder)
                 .setSize(10);
 
         System.out.println(searchRequestBuilder.toString());

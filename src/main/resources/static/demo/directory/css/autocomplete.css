@@ -1,0 +1,9 @@
+/*
+�옄�룞�셿�꽦 css�엫.
+jquery-ui �뿉�꽌 �뒳�씪�씠�뜑�옉 �뵒�옄�씤�씠 寃뱀튂湲� �븣臾몄뿉 �뵲濡� 類먯쓬
+by jihoon
+*/
+.autocomplete-suggestions { background: #FFF; cursor: default; overflow: auto; -webkit-box-shadow: 1px 4px 3px rgba(50, 50, 50, 0.64); -moz-box-shadow: 1px 4px 3px rgba(249, 99, 99, 0.64); box-shadow: 1px 4px 3px rgba(249, 99, 99, 0.64); }
+.autocomplete-suggestion { padding: 8px 8px; font-size:11px; white-space: nowrap; overflow: hidden; font-family: NanumGothic,Malgun Gothic,Dotum,Gulim;}
+.autocomplete-selected { background: #F0F0F0; font-family: NanumGothic,Malgun Gothic,Dotum,,Gulim;}
+.autocomplete-suggestions strong { font-weight: normal; color: #e8242c; font-family: ,NanumGothic,Malgun GothicDotum,Gulim;}

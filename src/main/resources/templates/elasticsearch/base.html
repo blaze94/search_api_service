@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="ie ie8"> <![endif]-->
+<!--[if IE 9]><html class="ie ie9"> <![endif]-->
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="Citytours - Premium site template for city tours agencies, transfers and tickets.">
+    <meta name="author" content="Ansonika">
+    <title>맛집 블로그 검색 데모</title>
+
+
+    <!-- CSS -->
+    <link href="/demo/directory/css/base.css" rel="stylesheet">
+    <link href="/demo/directory/css/autocomplete.css" rel="stylesheet" type="text/css"/>
+
+    <!-- Radio and check inputs -->
+    <link href="/demo/directory/css/skins/square/grey.css" rel="stylesheet">
+
+    <!-- Range slider -->
+    <link href="/demo/directory/css/ion.rangeSlider.css" rel="stylesheet" >
+    <link href="/demo/directory/css/ion.rangeSlider.skinFlat.css" rel="stylesheet">
+
+    <!-- Google web fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Gochi+Hand' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Lato:300,400' rel='stylesheet' type='text/css'>
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+    <script src="/demo/directory/js/leaflet/leaflet-google.js"></script>
+    <link rel="stylesheet" href="/demo/directory/js/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="/demo/directory/js/leaflet/MarkerCluster.css" />
+    <link rel="stylesheet" href="/demo/directory/js/leaflet/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="/demo/directory/js/leaflet/screen.css" />
+    <link rel="stylesheet" href="/demo/directory/js/leaflet/mobile.css" />
+    <script src="/demo/directory/js/leaflet/leaflet.markercluster.js"></script>
+
+
+    <!--[if lt IE 9]>
+    <script src="/demo/directory/js/html5shiv.min.js"></script>
+    <script src="/demo/directory/js/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .leaflet-map-pane {
+            z-index: 2 !important;
+        }
+
+        .leaflet-google-layer {
+            z-index: 1 !important;
+        }
+    </style>
+</head>
+<body>
+
+<!--[if lte IE 8]>
+<p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a>.</p>
+<![endif]-->
+
+<div id="preloader">
+    <div class="sk-spinner sk-spinner-wave">
+        <div class="sk-rect1"></div>
+        <div class="sk-rect2"></div>
+        <div class="sk-rect3"></div>
+        <div class="sk-rect4"></div>
+        <div class="sk-rect5"></div>
+    </div>
+</div>
+<!-- End Preload -->
+
+<div class="layer"></div>
+<!-- Mobile menu overlay mask -->
+
+<div id="directions">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <form id="searchForm" class="clearfix" action="/web/search">
+                    <div class="input-group">
+                        <input type="text" autocomplete="off" name="q" value="${q!''}" id="q" placeholder="스토어 이름" class="form-control style-2">
+                        <input type="hidden" name="sort" value="${sort!''}" id="sort"/>
+                        <input type="hidden" name="fq" value="${fq!''}" id="fq"/>
+                        <input type="hidden" name="start" value="${apiParam.getFrom()!'0'}" id="start"/>
+                        <input type="hidden" name="pt" value="${pt!''}" id="pt"/>
+                        <input type="hidden" name="d" value="${apiParam.getD()!'10'}" id="d"/>
+                        <span class="input-group-addon" style="padding: 6px 6px;position: absolute; z-index: 9999 ;right: 80px; top:4px; border: none; width:4%; border-radius:10px;"><i class="icon-target geolocation" data-toggle="tooltip" data-placement="bottom" title="현재 위치 기준"></i></span>
+                        <span class="input-group-btn">
+					<button class="btn" type="submit" value="Get directions" style="margin-left:0;">상점 검색</button>
+					</span>
+                    </div><!-- /input-group -->
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<#if spellResult??>
+    <#if spellResult?size gt 0 >
+        <div id="search_bar_container">
+            <div class="container">
+                <div class="search_bar">
+                    <span > 혹시 이런 검색어는 어떠세요? </span>
+                    <#list spellResult as item>
+                        <a href="/web/search?q=${item}" class="btn_1 white">${item}</a>
+                    </#list>
+
+                </div><!-- End search bar-->
+            </div>
+        </div>
+    </#if>
+</#if>
+<div class="map-container">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <!-- map-->
+            <div id="google-map" style="height:400px;"></div>
+        </div>
+    </div>
+</div>
+<div class="container margin_60">
+
+    <div class="row">
+        <aside class="col-lg-3 col-md-3">
+            <div id="filters_col">
+                <a data-toggle="collapse" href="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters" id="filters_col_bt"><i class="icon_set_1_icon-65"></i>Filters <i class="icon-plus-1 pull-right"></i></a>
+                <div class="collapse" id="collapseFilters">
+                    <div class="filter_type">
+                        <h6>거리별(<span id="locationStr"></span>)</h6>
+                        <input type="text" id="range2" name="range2" value="">
+                    </div>
+                    <div class="filter_type">
+                        <h6>별점별</h6>
+                        <ul>
+                            <#if rateAgg??>
+                                <#list rateAgg as item>
+                                    <li><label><input type="checkbox" name="rateFacet" value="${item.getKeyAsString()}"><span class="rating">
+                                    <#list 0..item.getKeyAsString()?number as temp>
+                                        <i class="icon_set_1_icon-81 voted"></i>
+                                    </#list>
+                                    </span>(${item.getDocCount()})</label></li>
+                                </#list>
+                            </#if>
+                        </ul>
+                    </div>
+                    <div class="filter_type">
+                        <h6>지역별</h6>
+                        <ul>
+                            <#if regionAgg??>
+                                <#list regionAgg as item>
+                                    <#if item.getKeyAsString()?string != "">
+                                        <li><a href="#"><label>${item.getKeyAsString()}</label></span>(${item.getDocCount()})</label></a></li>
+                                    </#if>
+                                </#list>
+                            </#if>
+
+                        </ul>
+                    </div>
+                    <div class="filter_type">
+                        <h6>카테고리</h6>
+                        <ul>
+                            <#if cateAgg??>
+                                <#list cateAgg as item>
+                                    <#if item.getKeyAsString()?string != "">
+                                        <li><a href="#"><label>${item.getKeyAsString()}</label></span>(${item.getDocCount()})</label></a></li>
+                                    </#if>
+                                </#list>
+                            </#if>
+                        </ul>
+                    </div>
+                </div><!--End collapse -->
+            </div><!--End filters col-->
+        </aside><!--End aside -->
+
+        <div class="col-lg-9 col-md-9">
+
+            <div id="tools">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                        <div class="styled-select-filters">
+                            <select name="sort_value" id="sort_value" >
+                                <option value="" selected>정렬순서</option>
+                                <#if sort??>
+                                    <option value="" <#if sort == ''>selected</#if>>검색랭킹순</option>
+                                    <option value="title.keyword ASC" <#if sort == 'title.keyword ASC'>selected</#if>>가나다순</option>
+                                    <option value="rate DESC" <#if sort == 'rate DESC'>selected</#if>>평점순</option>
+                                <#else>
+                                    <option value="">검색랭킹순</option>
+                                    <option value="title.keyword ASC">가나다순</option>
+                                    <option value="rate DESC">평점순</option>
+                                </#if>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+
+                    </div>
+
+                    <div class="col-md-6 col-sm-6 hidden-xs text-right">
+                    </div>
+                </div>
+            </div><!--/tools -->
+
+
+            <#list mapList as item>
+                <div class="strip_all_tour_list wow fadeIn" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeIn;">
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-1">
+                            </div>
+                        <div class="col-lg-10 col-md-10 col-sm-10">
+                            <div class="tour_list_desc">
+                                <div class="rating">
+                                    <#list 0..item.rate?number as temp>
+                                        <i class="icon_set_1_icon-81 voted"></i>
+                                    </#list>
+                                </div>
+                                <h3>${item.title}</h3>
+                                <p>${item.description}</p>
+                                <p>${item.category1}-${item.category2}</p>
+                                <p>${item.telephone}</p>
+                                <p>${item.address}</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-1">
+
+                        </div>
+                    </div>
+                </div>
+
+            </#list>
+
+            <div class="text-center">
+                <ul class="pagination">
+                    <#if pagingResult.prevPage gt 0 >
+                        <li class="paginate_button previous" ><a href="/web/search?q=${q}&from=${pagingResult.prevPage}&size=${size}&type=${type}" style="color:black">이전</i></a></li>
+                    </#if>
+                    <#list pagingResult.startPage..pagingResult.endPage as indexI>
+                        <#if indexI == pagingResult.nowPage>
+                            <li class="paginate_button current" ><a style="color: #fff;background-color: #455a64; "href="#" >${indexI}</a></li>
+                            <#else>
+                                <li class="paginate_button" ><a href="/web/search?q=${q}&from=${indexI}&size=${size}&type=${type}" style="color:black">${indexI}</a></li>
+                        </#if>
+                    </#list>
+                    <#if pagingResult.nextPage gt 0 >
+                        <li class="paginate_button next" ><a href="/web/search?q=${q}&from=${pagingResult.nextPage}&size=${size}&type=${type}" style="color:black" >다음</a></li>
+                    </#if>
+                </ul>
+            </div><!-- end pagination-->
+
+        </div><!-- End col lg-9 -->
+    </div><!-- End row -->
+</div><!-- End container -->
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="social_footer">
+                    <ul>
+                        <li><a href="#"><i class="icon-facebook"></i></a></li>
+                        <li><a href="#"><i class="icon-twitter"></i></a></li>
+                        <li><a href="#"><i class="icon-google"></i></a></li>
+                        <li><a href="#"><i class="icon-instagram"></i></a></li>
+                        <li><a href="#"><i class="icon-pinterest"></i></a></li>
+                        <li><a href="#"><i class="icon-vimeo"></i></a></li>
+                        <li><a href="#"><i class="icon-youtube-play"></i></a></li>
+                        <li><a href="#"><i class="icon-linkedin"></i></a></li>
+                    </ul>
+                    <p>검색 서비스 데모 </p>
+                </div>
+            </div>
+        </div><!-- End row -->
+    </div><!-- End container -->
+</footer><!-- End footer -->
+
+<div id="toTop"></div><!-- Back to top button -->
+
+<!-- Common scripts -->
+<script src="/demo/directory/js/jquery-1.11.2.min.js"></script>
+<script src="/demo/directory/js/common_scripts_min.js"></script>
+<script src="/demo/directory/js/functions.js"></script>
+
+<!-- Specific scripts -->
+<!-- Check and radio inputs -->
+<script src="/demo/directory/js/icheck.js"></script>
+<script>
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_square-grey',
+        radioClass: 'iradio_square-grey'
+    });
+</script>
+<!-- Map -->
+<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD-iTIdW6D7bLpYd1ugPvKdouAJSy-_xzo"></script>
+<script src="/demo/directory/js/GeoTrans.js"></script>
+<script src="/demo/directory/js/map_core.js"></script>
+<script src="/demo/directory/js/infobox.js"></script>
+
+
+
+<script src="/demo/directory/js/jquery-ui.js" type="text/javascript"></script>
+<script src="/demo/directory/js/jquery.cookie.js" type="text/javascript"></script>
+<script src="/demo/directory/js/jquery.autocomplete.js" type="text/javascript"></script>
+<script>
+
+$(function(){
+    options = {
+        serviceUrl:'/web/autocomplete',
+        matchContains: "word",
+        autoFill: true,
+        onSelect: function(obj){
+            $("#q").val(obj.value);
+            $("#searchForm").submit();
+        }
+    };
+    a = $('#q').autocomplete(options);
+    //a.enable();
+});
+
+$( "#sort_value" ).change(function() {
+    $("#sort").val($("#sort_value").val());
+    $("#searchForm").submit();
+});
+
+</script>
+
+<script>
+    $(document).ready(function($) {
+        "use strict";
+        doSearch();
+        $('.geolocation').on("click", function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success);
+            } else {
+                console.log('Geo Location is not supported');
+            }
+        });
+        function success(position) {
+            document.getElementById("pt").value=position.coords.latitude+ ","+ position.coords.longitude;
+            var locationCenter = new google.maps.LatLng( position.coords.latitude, position.coords.longitude);
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({
+                "latLng": locationCenter
+            }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    var lat = results[0].geometry.location.lat(),
+                        lng = results[0].geometry.location.lng(),
+                        placeName = results[0].address_components[0].short_name,
+                        latlng = new google.maps.LatLng(lat, lng);
+                    alert("현재 위치:" + results[0].formatted_address.replace('한국','').replace('대한민국','').replace(/(^\s*)|(\s*$)/gi, "") +"을 기준으로 검색합니다.");
+                    alert("lat:" + lat + ": lng" + lng);
+
+                    //$("#locationStr").appendTo();
+                        //$("#locationStr").innerText(results[0].formatted_address.replace('한국','').replace('대한민국','').replace(/(^\s*)|(\s*$)/gi, ""));
+                }
+            });
+        }
+    });
+    //이동이 완료 되었을 때 검색 호출
+    var showRange = function(data){
+        $("#d").val(data.to);
+        $("#searchForm").submit();
+    };
+
+    //가격 검색 후 가격 검색 정보를 저장
+    var showRange2 = $('#range2');
+    if ($('#searchForm > div > input:hidden[name=d]').val() != ''){
+        showRange2.data("to",$('#searchForm > div > input:hidden[name=d]').val());
+    }
+
+</script>
+</body>
+</html>

@@ -10,15 +10,24 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
+import org.elasticsearch.search.suggest.term.TermSuggestion;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.Normalizer;
 import java.util.*;
 
 /**
@@ -34,55 +43,49 @@ public class WebController {
     @Autowired
     ApiService apiService;
 
-    @RequestMapping(value="/search", method= RequestMethod.GET)
-    public ModelAndView elasticsearchSelect(ModelMap model, HttpServletRequest request, ApiParam apiParam, PagingParam pagingParam) throws  Exception{
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    public ModelAndView elasticsearchSelect(ModelMap model, HttpServletRequest request, ApiParam apiParam, PagingParam pagingParam) throws Exception {
         String result = "";
         String query = apiParam.getQ();
-        String type = apiParam.getType();
+        String type = "info";
         String rate = apiParam.getRate();
-        String price = apiParam.getPrice();
 
-
-//        String magazineTitleReplace = "Jamie Magazine.";
-//        magazineTitleReplace = magazineTitleReplace.replaceAll("\\.$","").trim();
-//        System.out.println(magazineTitleReplace);
 
         int nowPage = 0;
-        if (apiParam.getFrom() == null){
+        if (apiParam.getFrom() == null) {
             pagingParam.setNowPage(0);
-        }else{
+        } else {
             pagingParam.setNowPage(apiParam.getFrom());
         }
 
-        if (Strings.isNullOrEmpty(query)){
+        if (Strings.isNullOrEmpty(query)) {
             apiParam.setQ("*");
         }
 
-        SearchResponse searchResponse  = apiService.search(apiParam);
+        SearchResponse searchResponse = apiService.search(apiParam);
 
-        Terms agg = searchResponse.getAggregations().get("agg");
+        Terms regionAgg = searchResponse.getAggregations().get("region_agg");
+        Terms cateAgg = searchResponse.getAggregations().get("cate_agg");
+        Terms rateAgg = searchResponse.getAggregations().get("rate_agg");
 
-        System.out.println(agg.getBuckets().size());
 
-        for (Terms.Bucket list : agg.getBuckets()){
-            System.out.println(list.getKeyAsString());
-        }
+        List<Map<String, String>> mapList = new ArrayList<>();
 
-        List<Map<String,String>> mapList = new ArrayList<>();
-
-        Integer totalCnt = (int)searchResponse.getHits().getTotalHits();
+        Integer totalCnt = (int) searchResponse.getHits().getTotalHits();
         pagingParam = pageService.initPage(pagingParam, "/web/search");
         pagingParam.setTotalCount(totalCnt);
 
         PagingResult pagingResult = pageService.getPage(pagingParam);
-        model.put("agg",agg.getBuckets());
+        model.put("regionAgg", regionAgg.getBuckets());
+        model.put("cateAgg", cateAgg.getBuckets());
+        model.put("rateAgg", rateAgg.getBuckets());
         model.put("pagingResult", pagingResult);
         model.put("q", query);
 
-        if (apiParam.getSize() != null){
+        if (apiParam.getSize() != null) {
             model.put("size", apiParam.getSize());
-        }else{
-            model.put("size",12);
+        } else {
+            model.put("size", 12);
         }
 
         for (SearchHit hit : searchResponse.getHits()) {
@@ -92,60 +95,86 @@ public class WebController {
 
             mapData.put("score", String.valueOf(hit.getScore()));
 
-            if (hit.getHighlightFields().get("title") != null){
+            if (hit.getHighlightFields().get("title") != null) {
                 mapData.put("title", hit.getHighlightFields().get("title").getFragments()[0].toString());
-            }else{
-                if (map.get("title") != null){
+            } else {
+                if (map.get("title") != null) {
                     mapData.put("title", map.get("title").toString());
-                }else{
+                } else {
                     mapData.put("title", "");
                 }
             }
 
-            if (hit.getHighlightFields().get("author") != null){
-                mapData.put("author", hit.getHighlightFields().get("author").getFragments()[0].toString());
-            }else{
-                if (map.get("author") != null){
-                    mapData.put("author", map.get("author").toString());
-                }else{
-                    mapData.put("author", "");
+            if (hit.getHighlightFields().get("description") != null) {
+                mapData.put("description", hit.getHighlightFields().get("description").getFragments()[0].toString());
+            } else {
+                if (map.get("description") != null) {
+                    mapData.put("description", map.get("description").toString());
+                } else {
+                    mapData.put("description", "");
                 }
             }
-
-            if (hit.getHighlightFields().get("content") != null){
-                mapData.put("content", hit.getHighlightFields().get("content").getFragments()[0].toString());
-            }else{
-                if (map.get("content") != null){
-                    mapData.put("content", map.get("content").toString());
-                }else{
-                    mapData.put("content", "");
-                }
-            }
-            mapData.put("publishdate", map.get("publishdate").toString());
-            mapData.put("price", map.get("price").toString());
-            mapData.put("imgsrc", map.get("imgsrc").toString());
-
+            mapData.put("rate", map.get("rate").toString());
+            mapData.put("category1", map.get("category1").toString());
+            mapData.put("category2", map.get("category2").toString());
+            mapData.put("telephone", map.get("telephone").toString());
+            mapData.put("link", map.get("link").toString());
+            mapData.put("address", map.get("address").toString());
             mapList.add(mapData);
         }
 
+
+        List<String> spellList = new ArrayList<String>();
+        Suggest suggest = searchResponse.getSuggest();
+
+        if (suggest != null) {
+            TermSuggestion termSuggestion = searchResponse.getSuggest().getSuggestion("my-suggestion");
+            List<TermSuggestion.Entry> listEntry =  termSuggestion.getEntries();
+
+            for (TermSuggestion.Entry entry : listEntry) {
+                List<TermSuggestion.Entry.Option> listOption = entry.getOptions();
+                for (TermSuggestion.Entry.Option option : listOption) {
+                    spellList.add(Normalizer.normalize(option.getText().toString(), Normalizer.Form.NFC));
+                }
+            }
+            model.put("spellResult", spellList);
+        }
+
+        model.put("q", apiParam.getQ());
+        model.put("sort", apiParam.getSort());
+        model.put("fq", apiParam.getFq());
+        model.put("pt", apiParam.getPt());
         model.put("type", type);
         model.put("mapList", mapList);
-        return new ModelAndView("/elasticsearch/main", model);
+
+        model.put("apiParam", apiParam);
+        return new ModelAndView("/elasticsearch/base", model);
     }
 
-    @RequestMapping(value="/autoComplete", method= RequestMethod.GET)
-    public @ResponseBody String auto(ApiParam apiParam) throws  Exception{
+
+    @RequestMapping(value="/api/select", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Map<String,Object>>  getShopInJSON(ApiParam apiParam) throws Exception {
+        SearchResponse searchResponse = apiService.search(apiParam);
+        List<Map<String,Object>> esData = new ArrayList<Map<String,Object>>();
+        for(SearchHit hit : searchResponse.getHits()){
+            esData.add(hit.getSource());
+        }
+        return esData;
+    }
+
+    @RequestMapping(value = "/autocomplete", method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseEntity<String> autocomplete(@RequestParam(value = "query") String query,HttpServletResponse response) {
         String returnJson = "";
-
-        returnJson = apiService.autocomplete(apiParam);
-
-        return returnJson;
-    }
-
-
-    @RequestMapping(value="/test", method= RequestMethod.GET)
-    public ModelAndView testPage(ModelMap model) throws  Exception{
-
-        return new ModelAndView("/elasticsearch/page-starter",model);
+        ApiParam apiParam = new ApiParam();
+        apiParam.setQ(query);
+        try {
+            returnJson = apiService.autocomplete(apiParam);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.add("Content-Type", "text/html; charset=UTF-8");
+        return new ResponseEntity<String>(returnJson, responseHeaders, HttpStatus.ACCEPTED);
     }
 }
