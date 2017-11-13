@@ -40,7 +40,7 @@ public class ESConnector {
                     .build();
 
             client = new PreBuiltTransportClient(settings)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("52.78.175.82"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
         }
         return  instance;
     }
