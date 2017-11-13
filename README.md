@@ -5,7 +5,7 @@
 한글형태소분석기
 스펠체커
 자동완성분석기
-
+<pre>
 {
    "settings" : {
      "index":{
@@ -82,11 +82,12 @@
      }
    }
  }
-
+</pre>
 
  2. 매핑
 
 -PUT /store/_mappings/info
+<pre>
 {
 "properties": {
     "address": {
@@ -199,4 +200,4 @@
     }
 	}
 }
-
+</pre>
