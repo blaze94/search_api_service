@@ -8,7 +8,6 @@ http://gofile.me/32vUe/GykSKPQqd  다운로드 (패스워드 : 2580)
 자동완성 플러그인
 은전한님 플러그인
 스펠체커용 ICU 플러그인
-
 상점정보 10만건
 
 
@@ -16,7 +15,7 @@ http://gofile.me/32vUe/GykSKPQqd  다운로드 (패스워드 : 2580)
 한글형태소분석기
 스펠체커
 자동완성분석기
--PUT http://localhost:9200/store
+-PUT store
 <pre>
 {
    "settings" : {
@@ -98,7 +97,7 @@ http://gofile.me/32vUe/GykSKPQqd  다운로드 (패스워드 : 2580)
 
 3. 매핑
 
--PUT -PUT http://localhost:9200/store/_mappings/info
+-PUT http://localhost:9200/store/_mappings/info
 <pre>
 {
 "properties": {
@@ -211,5 +210,57 @@ http://gofile.me/32vUe/GykSKPQqd  다운로드 (패스워드 : 2580)
         }
     }
 	}
+}
+</pre>
+
+4. 로그스태쉬를 이용한 색인
+
+<pre>
+input {
+  jdbc {
+    jdbc_driver_library => "/home/ec2-user/logstash-6.1.3/mysql-connector-java-5.1.18.jar"
+    jdbc_driver_class => "com.mysql.jdbc.Driver"
+    jdbc_connection_string => "jdbc:mysql://123.142.190.80:23306/foodblog"
+    jdbc_user => "crawl_user"
+    jdbc_password => "crawl_user!!"
+    statement => "SELECT * FROM naveraddress WHERE not isnull(lat) LIMIT 100000"
+    jdbc_paging_enabled => "true"
+    jdbc_page_size => "5000"
+#    schedule => "* * * * *"
+  }
+}
+
+#    WHERE id > :sql_last_value
+#    use_column_value => true
+#    tracking_column => id
+
+filter {
+    mutate {
+       split => { "category" => ">" }
+       add_field => {
+	"category1" => "%{[category][0]}"
+ 	"category2" => "%{[category][1]}"
+       }
+       split => { "address" => " " }
+       add_field => {
+	"region" => "%{[address][0]}"
+       }
+       remove_field => [  "@version", "@timestamp"]
+       add_field => {
+        "location" => ["%{lat},%{lng}"]
+        }
+    }
+}
+
+output {
+  stdout {
+        codec => rubydebug
+    }
+  elasticsearch {
+    hosts => ["127.0.0.1:9200"]
+        index => "store"
+        document_type => "info"
+        manage_template => false
+  }
 }
 </pre>
