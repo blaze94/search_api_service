@@ -16,6 +16,7 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.*;
 import org.elasticsearch.search.suggest.SuggestBuilder;
@@ -150,7 +151,7 @@ public class ApiServiceImpl implements ApiService {
 
 
         /*Spellcheck*/
-        SuggestionBuilder<?> suggestionBuilder = SuggestBuilders.termSuggestion("title.spells")
+        SuggestionBuilder<?> suggestionBuilder = SuggestBuilders.termSuggestion("title.keyword")
                 .stringDistance(TermSuggestionBuilder.StringDistanceImpl.DAMERAU_LEVENSHTEIN)
                 .accuracy((float) 0.7)
                 .size(2);
@@ -165,12 +166,10 @@ public class ApiServiceImpl implements ApiService {
                 .field("category1.keyword").subAggregation(AggregationBuilders.terms("agg2").field("category2.keyword"));
         AggregationBuilder aggregationBuilder2 = AggregationBuilders
                 .terms("rate_agg")
-                .order(Terms.Order.term(false))
                 .field("rate");
         AggregationBuilder aggregationBuilder3 = AggregationBuilders
                 .terms("region_agg")
-                .order(Terms.Order.term(false))
-                .field("region");
+                .field("region.keyword");
 
         List<AggregationBuilder> listAggregationBuilder = new LinkedList<>();
         listAggregationBuilder.add(aggregationBuilder1);

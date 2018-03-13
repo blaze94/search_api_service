@@ -1,21 +1,28 @@
 package api.search.common;
 
 import api.search.domain.param.ApiParam;
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
+import org.apache.http.message.BasicHeader;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilder;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import java.net.InetAddress;
+
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by GGBX08 on 2017-07-11.
@@ -23,11 +30,11 @@ import java.util.List;
 public class ESConnector {
     public static ESConnector instance;
 
-    public TransportClient getClient() {
+    public RestHighLevelClient getClient() {
         return client;
     }
 
-    private static TransportClient client;
+    private static RestHighLevelClient client;
     private ESConnector(){}
 
 
@@ -35,17 +42,17 @@ public class ESConnector {
         if(instance == null){
             instance = new ESConnector();
 
-            Settings settings = Settings.builder()
-                    .put("cluster.name", "my-application")
-                    .build();
+            Header[] defaultHeaders = new Header[]{new BasicHeader("header", "value")};
+            client = new RestHighLevelClient(
+                    RestClient.builder(
+                            new HttpHost("13.124.211.211", 9200, "http"),
+                            new HttpHost("13.124.211.211", 9201, "http")).setDefaultHeaders(defaultHeaders));
 
-            client = new PreBuiltTransportClient(settings)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
         }
         return  instance;
     }
 
-    public SearchResponse search(String[] indexName, String typeName, QueryBuilder queryBuilder, SortBuilder sortBuilders, HighlightBuilder highlightBuilder, SuggestBuilder suggestBuilder, List<AggregationBuilder> listAggregationBuilder, ApiParam apiParam) {
+    public SearchResponse search(String[] indexName, String typeName, QueryBuilder queryBuilder, SortBuilder sortBuilders, HighlightBuilder highlightBuilder, SuggestBuilder suggestBuilder, List<AggregationBuilder> listAggregationBuilder, ApiParam apiParam) throws IOException {
         int fromRows = 0;
         int size = 12;
 
@@ -57,40 +64,43 @@ public class ESConnector {
             fromRows = (apiParam.getFrom() -1) * size;
         }
 
-        SearchRequestBuilder searchRequestBuilder = client.prepareSearch().setIndices(indexName)
-                .setTypes(typeName)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(queryBuilder)
-                .setFrom(fromRows)
-                .setSize(size)
-                .highlighter(highlightBuilder)
-                .addSort(sortBuilders)
-                .suggest(suggestBuilder);
-
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(queryBuilder);
+        sourceBuilder.from(fromRows);
+        sourceBuilder.size(size);
+        sourceBuilder.highlighter(highlightBuilder);
+        sourceBuilder.sort(sortBuilders);
         if (listAggregationBuilder != null){
             for(AggregationBuilder aggregationBuilder : listAggregationBuilder) {
-                searchRequestBuilder.addAggregation(aggregationBuilder);
+                sourceBuilder.aggregation(aggregationBuilder);
             }
         }
+        sourceBuilder.suggest(suggestBuilder);
+        sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
 
-        System.out.println(searchRequestBuilder.toString());
-        SearchResponse searchResponse =  searchRequestBuilder.execute().actionGet();
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.source(sourceBuilder);
+        searchRequest.indices(indexName);
+        searchRequest.types(typeName);
+        SearchResponse searchResponse =  client.search(searchRequest);
 //        System.out.println(searchResponse);
-
 
         return  searchResponse;
     }
 
     public SearchResponse executeAutocompleteQuery(String indexName, String typeName,QueryBuilder queryBuilder, AggregationBuilder aggregationBuilder) throws Exception{
-        SearchRequestBuilder searchRequestBuilder = client.prepareSearch().setIndices(indexName)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setTypes(typeName)
-                .setQuery(queryBuilder)
-                .addAggregation(aggregationBuilder)
-                .setSize(10);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(queryBuilder);
+        sourceBuilder.from(0);
+        sourceBuilder.size(10);
+        sourceBuilder.aggregation(aggregationBuilder);
 
-        System.out.println(searchRequestBuilder.toString());
-        SearchResponse searchResponse =  searchRequestBuilder.execute().actionGet();
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.source(sourceBuilder);
+        searchRequest.indices(indexName);
+        searchRequest.types(typeName);
+
+        SearchResponse searchResponse =  client.search(searchRequest);
 
         return searchResponse;
     }

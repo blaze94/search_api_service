@@ -151,18 +151,6 @@ public class WebController {
         return new ModelAndView("/elasticsearch/base", model);
     }
 
-
-    @RequestMapping(value="/api/select", method = RequestMethod.GET)
-    @ResponseBody
-    public List<Map<String,Object>>  getShopInJSON(ApiParam apiParam) throws Exception {
-        SearchResponse searchResponse = apiService.search(apiParam);
-        List<Map<String,Object>> esData = new ArrayList<Map<String,Object>>();
-        for(SearchHit hit : searchResponse.getHits()){
-            esData.add(hit.getSource());
-        }
-        return esData;
-    }
-
     @RequestMapping(value = "/autocomplete", method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseEntity<String> autocomplete(@RequestParam(value = "query") String query,HttpServletResponse response) {
         String returnJson = "";
