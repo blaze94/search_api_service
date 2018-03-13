@@ -165,4 +165,20 @@ public class WebController {
         responseHeaders.add("Content-Type", "text/html; charset=UTF-8");
         return new ResponseEntity<String>(returnJson, responseHeaders, HttpStatus.ACCEPTED);
     }
+
+
+    /*
+    지도 좌표를 AJAX로 셀렉하기 위한 메소드
+     */
+    @RequestMapping(value="/api/select", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Map<String,Object>>  getShopInJSON(ApiParam apiParam) throws Exception {
+        SearchResponse searchResponse = apiService.search(apiParam);
+        List<Map<String,Object>> esData = new ArrayList<Map<String,Object>>();
+        for(SearchHit hit : searchResponse.getHits()){
+            esData.add(hit.getSourceAsMap());
+        }
+        return esData;
+    }
+
 }
