@@ -45,8 +45,8 @@ public class ESConnector {
             Header[] defaultHeaders = new Header[]{new BasicHeader("header", "value")};
             client = new RestHighLevelClient(
                     RestClient.builder(
-                            new HttpHost("13.124.211.211", 9200, "http"),
-                            new HttpHost("13.124.211.211", 9201, "http")).setDefaultHeaders(defaultHeaders));
+                            new HttpHost("13.125.227.130", 9200, "http"),
+                            new HttpHost("13.125.227.130", 9201, "http")).setDefaultHeaders(defaultHeaders));
 
         }
         return  instance;

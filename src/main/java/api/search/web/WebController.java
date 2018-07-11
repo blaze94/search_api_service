@@ -47,7 +47,7 @@ public class WebController {
     public ModelAndView elasticsearchSelect(ModelMap model, HttpServletRequest request, ApiParam apiParam, PagingParam pagingParam) throws Exception {
         String result = "";
         String query = apiParam.getQ();
-        String type = "info";
+        String type = "doc";
         String rate = apiParam.getRate();
 
 

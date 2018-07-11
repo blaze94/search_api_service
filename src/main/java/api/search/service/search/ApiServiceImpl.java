@@ -178,7 +178,7 @@ public class ApiServiceImpl implements ApiService {
 
 
         String[] indexName = {"store"};
-        SearchResponse searchResponse = ESConnector.getInstance().search(indexName, "info", boolQueryBuilder, sortBuilder, highlightBuilder, suggestBuilder, listAggregationBuilder, apiParam);
+        SearchResponse searchResponse = ESConnector.getInstance().search(indexName, "doc", boolQueryBuilder, sortBuilder, highlightBuilder, suggestBuilder, listAggregationBuilder, apiParam);
         return searchResponse;
     }
 
@@ -202,7 +202,7 @@ public class ApiServiceImpl implements ApiService {
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
                     .must(multiMatchQueryBuilder);
             boolQueryBuilder.must(QueryBuilders.functionScoreQuery(ScoreFunctionBuilders.scriptFunction(new Script("_score - doc['title.auto'].values.size()"))));
-            SearchResponse searchResponse = ESConnector.getInstance().executeAutocompleteQuery("store", "info",boolQueryBuilder,aggregationBuilder);
+            SearchResponse searchResponse = ESConnector.getInstance().executeAutocompleteQuery("store", "doc",boolQueryBuilder,aggregationBuilder);
 
 
 
