@@ -3,7 +3,7 @@
 <BR>
 
 1. 엘라스틱서치
-http://gofile.me/32vUe/GykSKPQqd  다운로드 (패스워드 : 2580)
+http://gofile.me/32vUe/C7LfoLebS  다운로드 
 <BR>설치내역
 <BR>자동완성 플러그인
 <BR>은전한님 플러그인
