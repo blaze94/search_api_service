@@ -151,7 +151,7 @@ public class ApiServiceImpl implements ApiService {
 
 
         /*Spellcheck*/
-        SuggestionBuilder<?> suggestionBuilder = SuggestBuilders.termSuggestion("title.keyword")
+        SuggestionBuilder<?> suggestionBuilder = SuggestBuilders.termSuggestion("title.spells")
                 .stringDistance(TermSuggestionBuilder.StringDistanceImpl.DAMERAU_LEVENSHTEIN)
                 .accuracy((float) 0.7)
                 .size(2);
@@ -252,6 +252,7 @@ public class ApiServiceImpl implements ApiService {
         return queryStringQueryBuilder;
     }
 }
+
 
 
 
